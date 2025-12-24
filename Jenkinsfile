@@ -6,9 +6,9 @@ pipeline {
     stages {
         stage('Checkout') {
     steps {
-        git branch: 'elbelaidi',
+        git branch: 'main',
             credentialsId: 'github',
-            url: 'https://github.com/SimoHb7/Assistant-Vocal.git'
+            url: 'https://github.com/elbelaidi/Assistant-Financier.git'
     }
 }
 
