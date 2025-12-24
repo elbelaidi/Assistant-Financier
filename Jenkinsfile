@@ -1,7 +1,10 @@
 pipeline {
     agent any
     tools {
-        maven 'Maven' 
+        maven 'Maven'
+    }
+    triggers {
+        githubPush()
     }
     stages {
         stage('Checkout') {
