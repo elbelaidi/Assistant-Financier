@@ -16,6 +16,7 @@ public class AIModelService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    
     // Hugging Face API key - Get free key from https://huggingface.co/settings/tokens
     private final String apiKey = System.getenv("HUGGING_FACE_API_KEY") != null ? System.getenv("HUGGING_FACE_API_KEY") : "hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
     
