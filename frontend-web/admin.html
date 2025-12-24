@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Financial Assistant</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .admin-header h1 {
+            margin: 0;
+            color: #1a365d;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            background: #e2e8f0;
+            color: #1a365d;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a365d;
+            margin: 0;
+        }
+
+        .users-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            color: #1a365d;
+        }
+
+        .search-box {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 300px;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow-x: auto;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            font-weight: 600;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f7fafc;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active { background: #c6f6d5; color: #22543d; }
+        .status-inactive { background: #fed7d7; color: #742a2a; }
+
+        .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .role-admin { background: #bee3f8; color: #2c5282; }
+        .role-user { background: #e9d8fd; color: #44337a; }
+
+        .btn-action {
+            padding: 5px 12px;
+            font-size: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .btn-view {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+
+        .btn-toggle {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .spinner {
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #1a365d;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #1a365d;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #718096;
+        }
+
+        .detail-row {
+            display: flex;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #1a365d;
+            width: 180px;
+        }
+
+        .detail-value {
+            color: #4a5568;
+        }
+
+        .no-access {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+
+        .no-access h2 {
+            color: #e53e3e;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container" id="adminContainer">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading admin panel...</p>
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>User Details</h2>
+                <button class="close-modal" onclick="closeModal()">×</button>
+            </div>
+            <div id="userDetails">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading user details...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        let allUsers = [];
+
+        async function checkAdminAccess() {
+            try {
+                requireAuth();
+                const userInfo = getUserInfo();
+                
+                if (!userInfo || userInfo.role !== 'ADMIN') {
+                    document.getElementById('adminContainer').innerHTML = `
+                        <div class="no-access">
+                            <h2>⚠️ Access Denied</h2>
+                            <p>You do not have administrator privileges to access this page.</p>
+                            <button class="btn-secondary" onclick="window.location.href='dashboard.html'">
+                                Back to Dashboard
+                            </button>
+                        </div>
+                    `;
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+
+        async function loadAdminPanel() {
+            const hasAccess = await checkAdminAccess();
+            if (!hasAccess) return;
+
+            try {
+                const token = getToken();
+                
+                // Load system stats
+                const statsResponse = await fetch(`${API_BASE_URL}/api/admin/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!statsResponse.ok) throw new Error('Failed to load stats');
+                const stats = await statsResponse.json();
+
+                // Load users
+                const usersResponse = await fetch(`${API_BASE_URL}/api/admin/users`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!usersResponse.ok) throw new Error('Failed to load users');
+                allUsers = await usersResponse.json();
+
+                displayAdminPanel(stats, allUsers);
+            } catch (error) {
+                console.error('Error loading admin panel:', error);
+                document.getElementById('adminContainer').innerHTML = `
+                    <div class="no-access">
+                        <h2>Error Loading Admin Panel</h2>
+                        <p>${error.message}</p>
+                        <button class="btn-secondary" onclick="window.location.reload()">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function displayAdminPanel(stats, users) {
+            const container = document.getElementById('adminContainer');
+            
+            container.innerHTML = `
+                <div class="admin-header">
+                    <h1>👑 Admin Panel</h1>
+                    <button class="btn-secondary" onclick="window.location.href='dashboard.html'">
+                        ← Back to Dashboard
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Users</h3>
+                        <p class="stat-value">${stats.totalUsers}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Users</h3>
+                        <p class="stat-value" style="color: #38a169;">${stats.activeUsers}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Transactions</h3>
+                        <p class="stat-value">${stats.totalTransactions}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Conversations</h3>
+                        <p class="stat-value">${stats.totalConversations}</p>
+                    </div>
+                </div>
+
+                <div class="users-section">
+                    <div class="section-header">
+                        <h2>User Management</h2>
+                        <input type="text" class="search-box" id="searchBox" 
+                               placeholder="Search users..." onkeyup="filterUsers()">
+                    </div>
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Transactions</th>
+                                <th>Conversations</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersBody">
+                            ${users.map(user => createUserRow(user)).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function createUserRow(user) {
+            return `
+                <tr>
+                    <td>${escapeHtml(user.nom)}</td>
+                    <td>${escapeHtml(user.email)}</td>
+                    <td><span class="role-badge role-${user.role.toLowerCase()}">${user.role}</span></td>
+                    <td><span class="status-badge status-${user.active ? 'active' : 'inactive'}">
+                        ${user.active ? 'Active' : 'Inactive'}
+                    </span></td>
+                    <td>${user.transactionCount}</td>
+                    <td>${user.conversationCount}</td>
+                    <td>${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}</td>
+                    <td>
+                        <button class="btn-action btn-view" onclick="viewUserDetails(${user.id})">View</button>
+                        <button class="btn-action btn-toggle" onclick="toggleUserStatus(${user.id})">
+                            ${user.active ? 'Deactivate' : 'Activate'}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const filtered = allUsers.filter(user => 
+                user.nom.toLowerCase().includes(searchTerm) ||
+                user.email.toLowerCase().includes(searchTerm)
+            );
+            
+            const tbody = document.getElementById('usersBody');
+            tbody.innerHTML = filtered.map(user => createUserRow(user)).join('');
+        }
+
+        async function viewUserDetails(userId) {
+            try {
+                const token = getToken();
+                const modal = document.getElementById('userModal');
+                const detailsDiv = document.getElementById('userDetails');
+                
+                modal.classList.add('active');
+                detailsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading...</p></div>';
+                
+                const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load user details');
+                const user = await response.json();
+                
+                detailsDiv.innerHTML = `
+                    <div class="detail-row">
+                        <div class="detail-label">ID:</div>
+                        <div class="detail-value">${user.id}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Name:</div>
+                        <div class="detail-value">${escapeHtml(user.nom)}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Email:</div>
+                        <div class="detail-value">${escapeHtml(user.email)}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Phone:</div>
+                        <div class="detail-value">${user.telephone || 'N/A'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Role:</div>
+                        <div class="detail-value"><span class="role-badge role-${user.role.toLowerCase()}">${user.role}</span></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Status:</div>
+                        <div class="detail-value"><span class="status-badge status-${user.active ? 'active' : 'inactive'}">
+                            ${user.active ? 'Active' : 'Inactive'}
+                        </span></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Language:</div>
+                        <div class="detail-value">${user.languePreferee}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Member Since:</div>
+                        <div class="detail-value">${new Date(user.createdAt).toLocaleString()}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Last Login:</div>
+                        <div class="detail-value">${user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'Never'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Transactions:</div>
+                        <div class="detail-value">${user.transactionCount}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Conversations:</div>
+                        <div class="detail-value">${user.conversationCount}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Balance:</div>
+                        <div class="detail-value" style="color: ${user.financialSummary.balance >= 0 ? '#38a169' : '#e53e3e'}; font-weight: 600;">
+                            €${user.financialSummary.balance.toFixed(2)}
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Total Income:</div>
+                        <div class="detail-value" style="color: #38a169;">
+                            €${user.financialSummary.totalIncome.toFixed(2)}
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Total Expenses:</div>
+                        <div class="detail-value" style="color: #e53e3e;">
+                            €${user.financialSummary.totalExpenses.toFixed(2)}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading user details:', error);
+                alert('Failed to load user details');
+                closeModal();
+            }
+        }
+
+        async function toggleUserStatus(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            const action = user.active ? 'deactivate' : 'activate';
+            if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+
+            try {
+                const token = getToken();
+                const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/toggle-status`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to update user status');
+
+                await loadAdminPanel();
+            } catch (error) {
+                console.error('Error toggling user status:', error);
+                alert('Failed to update user status');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('userModal').classList.remove('active');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        window.addEventListener('DOMContentLoaded', loadAdminPanel);
+    </script>
+</body>
+</html>

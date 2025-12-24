@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Assistant Financier</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Confirmation Modal */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .confirm-modal.active {
+            display: flex;
+        }
+
+        .confirm-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .confirm-modal-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #f6ad55;
+        }
+
+        .confirm-modal-message {
+            font-size: 18px;
+            color: #1a365d;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .confirm-modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .confirm-btn-cancel {
+            background: #e2e8f0;
+            color: #1a365d;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .confirm-btn-cancel:hover {
+            background: #cbd5e0;
+        }
+
+        .confirm-btn-confirm {
+            background: #fc8181;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .confirm-btn-confirm:hover {
+            background: #f56565;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-coins"></i>
+                <h2>Assistant Financier</h2>
+            </div>
+            
+            <div class="user-profile">
+                <div class="profile-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="profile-info">
+                    <h3 id="userName">Chargement...</h3>
+                    <p id="userEmail">...</p>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" onclick="showSection('overview', this); return false;">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Tableau de bord</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('assistant', this); return false;">
+                    <i class="fas fa-microphone"></i>
+                    <span>Assistant Vocal</span>
+                </a>
+                <a href="transactions.html" class="nav-item">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                </a>
+                <a href="history.html" class="nav-item">
+                    <i class="fas fa-history"></i>
+                    <span>Historique</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Paramètres</span>
+                </a>
+                <a href="admin.html" class="nav-item" id="adminLink" style="display: none;">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Admin Panel</span>
+                </a>
+                <a href="#" class="nav-item" onclick="handleLogout(); return false;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1 id="sectionTitle">Tableau de bord</h1>
+                <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </header>
+            
+            <!-- Overview Section -->
+            <section id="overview" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #4caf50, #81c784);">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Solde Total</h3>
+                            <p class="stat-value">0 €</p>
+                            <span class="stat-change positive">+0%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #2196f3, #64b5f6);">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Revenus (mois)</h3>
+                            <p class="stat-value">0 €</p>
+                            <span class="stat-change positive">+0%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f44336, #e57373);">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Dépenses (mois)</h3>
+                            <p class="stat-value">0 €</p>
+                            <span class="stat-change negative">+0%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #ff9800, #ffb74d);">
+                            <i class="fas fa-piggy-bank"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Épargne</h3>
+                            <p class="stat-value">0 €</p>
+                            <span class="stat-change">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="quick-actions">
+                    <h2 data-i18n="quickActionsTitle">Actions Rapides</h2>
+                    <div class="actions-grid">
+                        <button class="action-btn" onclick="showSection('assistant', this)">
+                            <i class="fas fa-microphone"></i>
+                            <span>Poser une question</span>
+                        </button>
+                        <button class="action-btn" onclick="window.location.href='transactions.html'">
+                            <i class="fas fa-plus"></i>
+                            <span>Ajouter transaction</span>
+                        </button>
+                        <button class="action-btn" onclick="window.location.href='history.html'">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Voir historique</span>
+                        </button>
+                        <button class="action-btn" onclick="window.location.href='settings.html'">
+                            <i class="fas fa-cog"></i>
+                            <span>Paramètres</span>
+                        </button>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div style="margin-top: 30px;">
+                        <h2 style="color: #1a365d; margin-bottom: 20px;">Aperçu Financier</h2>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
+                            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <h3 style="color: #1a365d; margin: 0 0 15px 0;">Revenus vs Dépenses</h3>
+                                <canvas id="incomeExpenseChart" style="max-height: 250px;"></canvas>
+                            </div>
+                            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <h3 style="color: #1a365d; margin: 0 0 15px 0;">Dépenses par Catégorie</h3>
+                                <canvas id="categoryChart" style="max-height: 250px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Assistant Section (embedded from original) -->
+            <section id="assistant" class="content-section">
+                <iframe src="index.html?embedded=true" style="width: 100%; height: calc(100vh - 120px); border: none; border-radius: 12px;"></iframe>
+            </section>
+            
+            <!-- Transactions Section -->
+            <section id="transactions" class="content-section">
+                <div class="section-placeholder">
+                    <i class="fas fa-exchange-alt"></i>
+                    <h2>Transactions</h2>
+                    <p>Gérez vos transactions financières ici.</p>
+                    <p class="placeholder-note">Cette section sera développée prochainement.</p>
+                </div>
+            </section>
+            
+            <!-- History Section -->
+            <section id="history" class="content-section">
+                <div class="section-placeholder">
+                    <i class="fas fa-history"></i>
+                    <h2>Historique des Conversations</h2>
+                    <p>Consultez l'historique de vos conversations avec l'assistant.</p>
+                    <p class="placeholder-note">Cette section sera développée prochainement.</p>
+                </div>
+            </section>
+            
+            <!-- Settings Section -->
+            <section id="settings" class="content-section">
+                <div class="section-placeholder">
+                    <i class="fas fa-cog"></i>
+                    <h2>Paramètres</h2>
+                    <p>Gérez vos préférences et paramètres de compte.</p>
+                    <p class="placeholder-note">Cette section sera développée prochainement.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="confirm-modal">
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-icon">⚠️</div>
+            <div id="confirmMessage" class="confirm-modal-message">Êtes-vous sûr de vouloir vous déconnecter?</div>
+            <div class="confirm-modal-buttons">
+                <button id="confirmCancel" class="confirm-btn-cancel">Annuler</button>
+                <button id="confirmOk" class="confirm-btn-confirm">Déconnexion</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script src="translations.js"></script>
+    <script>
+        let confirmCallback = null;
+
+        function showConfirmModal(message, callback) {
+            document.getElementById('confirmMessage').textContent = message;
+            confirmCallback = callback;
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        function hideConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+            confirmCallback = null;
+        }
+
+        document.getElementById('confirmCancel').addEventListener('click', hideConfirmModal);
+        document.getElementById('confirmOk').addEventListener('click', () => {
+            if (confirmCallback) confirmCallback();
+            hideConfirmModal();
+        });
+    </script>
+    <script>
+        let incomeExpenseChart = null;
+        let categoryChart = null;
+
+        // Check authentication
+        if (!requireAuth()) {
+            // Will redirect to login
+        }
+        
+        // Load user info
+        const user = getUserInfo();
+        if (user) {
+            document.getElementById('userName').textContent = user.nom;
+            document.getElementById('userEmail').textContent = user.email;
+        }
+        
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                const token = getToken();
+                
+                // Load financial summary
+                const summaryResponse = await fetch(`${API_BASE_URL}/api/transactions/summary`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (summaryResponse.ok) {
+                    const summary = await summaryResponse.json();
+                    
+                    // Update stat cards
+                    document.querySelector('.stat-card:nth-child(1) .stat-value').textContent = 
+                        `€${summary.balance.toFixed(2)}`;
+                    document.querySelector('.stat-card:nth-child(2) .stat-value').textContent = 
+                        `€${summary.totalIncome.toFixed(2)}`;
+                    document.querySelector('.stat-card:nth-child(3) .stat-value').textContent = 
+                        `€${summary.totalExpenses.toFixed(2)}`;
+                    
+                    // Calculate savings
+                    const savings = summary.balance * 0.2; // Assume 20% of balance is savings
+                    document.querySelector('.stat-card:nth-child(4) .stat-value').textContent = 
+                        `€${savings.toFixed(2)}`;
+                    
+                    // Update charts
+                    createIncomeExpenseChart(summary.totalIncome, summary.totalExpenses);
+                }
+                
+                // Load expenses by category
+                const categoryResponse = await fetch(`${API_BASE_URL}/api/transactions/expenses-by-category`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (categoryResponse.ok) {
+                    const categoryData = await categoryResponse.json();
+                    createCategoryChart(categoryData);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+        
+        function createIncomeExpenseChart(income, expenses) {
+            const ctx = document.getElementById('incomeExpenseChart');
+            if (!ctx) return;
+            
+            if (incomeExpenseChart) {
+                incomeExpenseChart.destroy();
+            }
+            
+            incomeExpenseChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Revenus', 'Dépenses', 'Net'],
+                    datasets: [{
+                        label: 'Montant (€)',
+                        data: [income, expenses, income - expenses],
+                        backgroundColor: [
+                            'rgba(56, 161, 105, 0.8)',
+                            'rgba(229, 62, 62, 0.8)',
+                            'rgba(26, 54, 93, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(56, 161, 105, 1)',
+                            'rgba(229, 62, 62, 1)',
+                            'rgba(26, 54, 93, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '€' + value.toFixed(0);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createCategoryChart(categoryData) {
+            const ctx = document.getElementById('categoryChart');
+            if (!ctx) return;
+            
+            if (categoryChart) {
+                categoryChart.destroy();
+            }
+            
+            const categories = Object.keys(categoryData);
+            const values = Object.values(categoryData);
+            
+            if (categories.length === 0) {
+                // No data, show placeholder
+                return;
+            }
+            
+            const colors = [
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)',
+                'rgba(199, 199, 199, 0.8)',
+                'rgba(83, 102, 255, 0.8)'
+            ];
+            
+            categoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: categories.map(c => c.charAt(0).toUpperCase() + c.slice(1)),
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors.slice(0, categories.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': €' + context.parsed.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDashboardData();
+
+            // Check for section parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const section = urlParams.get('section');
+            if (section) {
+                showSection(section);
+            }
+
+            // Initialize UI language to French for dashboard
+            updateUILanguage('fr');
+        });
+        
+        // Section navigation
+        function showSection(sectionId, element) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // Update nav active state - use element if provided, otherwise try to find it
+            if (element) {
+                const navItem = element.closest ? element.closest('.nav-item') : element.parentElement.closest('.nav-item');
+                if (navItem) {
+                    navItem.classList.add('active');
+                }
+            } else {
+                // Find the nav item by href or onclick
+                const navItem = document.querySelector(`.nav-item[onclick*="${sectionId}"]`);
+                if (navItem) {
+                    navItem.classList.add('active');
+                }
+            }
+            
+            // Update title
+            const titles = {
+                'overview': 'Tableau de bord',
+                'assistant': 'Assistant Vocal',
+                'transactions': 'Transactions',
+                'history': 'Historique',
+                'settings': 'Paramètres'
+            };
+            const titleElement = document.getElementById('sectionTitle');
+            if (titleElement && titles[sectionId]) {
+                titleElement.textContent = titles[sectionId];
+            }
+
+            // Update URL for assistant section
+            if (sectionId === 'assistant') {
+                history.pushState(null, '', '?section=assistant');
+            } else {
+                history.pushState(null, '', window.location.pathname);
+            }
+
+            // Close mobile sidebar
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+                sidebar.classList.remove('active');
+            }
+        }
+        
+        // Check if user is admin and show admin link
+        function checkAdminAccess() {
+            const userInfo = getUserInfo();
+            if (userInfo && userInfo.role === 'ADMIN') {
+                const adminLink = document.getElementById('adminLink');
+                if (adminLink) {
+                    adminLink.style.display = 'flex';
+                }
+            }
+        }
+        
+        // Logout
+        function handleLogout() {
+            showConfirmModal('Êtes-vous sûr de vouloir vous déconnecter?', () => {
+                logout();
+            });
+        }
+        
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('active');
+        }
+        
+        // Initialize
+        window.addEventListener('DOMContentLoaded', checkAdminAccess);
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            const sidebar = document.querySelector('.sidebar');
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !menuBtn.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

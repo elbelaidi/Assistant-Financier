@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Financial Assistant</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .settings-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .settings-header h1 {
+            margin: 0;
+            color: #1a365d;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            background: #e2e8f0;
+            color: #1a365d;
+        }
+
+        .settings-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .settings-section h2 {
+            margin: 0 0 20px 0;
+            color: #1a365d;
+            font-size: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1a365d;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1a365d;
+        }
+
+        .btn-primary {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(26, 54, 93, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success-message {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #742a2a;
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .password-requirements {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .spinner {
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #1a365d;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Confirmation Modal */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .confirm-modal.active {
+            display: flex;
+        }
+
+        .confirm-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .confirm-modal-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #f6ad55;
+        }
+
+        .confirm-modal-message {
+            font-size: 18px;
+            color: #1a365d;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .confirm-modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .confirm-btn-cancel {
+            background: #e2e8f0;
+            color: #1a365d;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .confirm-btn-cancel:hover {
+            background: #cbd5e0;
+        }
+
+        .confirm-btn-confirm {
+            background: #fc8181;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .confirm-btn-confirm:hover {
+            background: #f56565;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+  <div class="dashboard-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+          <div class="sidebar-header">
+              <i class="fas fa-coins"></i>
+              <h2>Assistant Financier</h2>
+          </div>
+
+          <div class="user-profile">
+              <div class="profile-avatar">
+                  <i class="fas fa-user-circle"></i>
+              </div>
+              <div class="profile-info">
+                  <h3 id="userName">Chargement...</h3>
+                  <p id="userEmail">...</p>
+              </div>
+          </div>
+
+          <nav class="sidebar-nav">
+              <a href="#" class="nav-item" onclick="showSection('overview', this); return false;">
+                  <i class="fas fa-chart-line"></i>
+                  <span>Tableau de bord</span>
+              </a>
+              <a href="#" class="nav-item" onclick="showSection('assistant', this); return false;">
+                  <i class="fas fa-microphone"></i>
+                  <span>Assistant Vocal</span>
+              </a>
+              <a href="transactions.html" class="nav-item">
+                  <i class="fas fa-exchange-alt"></i>
+                  <span>Transactions</span>
+              </a>
+              <a href="history.html" class="nav-item">
+                  <i class="fas fa-history"></i>
+                  <span>Historique</span>
+              </a>
+              <a href="#" class="nav-item active" onclick="showSection('settings', this); return false;">
+                  <i class="fas fa-cog"></i>
+                  <span>Paramètres</span>
+              </a>
+              <a href="admin.html" class="nav-item" id="adminLink" style="display: none;">
+                  <i class="fas fa-user-shield"></i>
+                  <span>Admin Panel</span>
+              </a>
+              <a href="#" class="nav-item" onclick="handleLogout(); return false;">
+                  <i class="fas fa-sign-out-alt"></i>
+                  <span>Déconnexion</span>
+              </a>
+          </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+          <header class="content-header">
+              <h1 id="sectionTitle">Paramètres</h1>
+              <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                  <i class="fas fa-bars"></i>
+              </button>
+          </header>
+
+          <div class="settings-container">
+        <div class="settings-header">
+            <h1>⚙️ Settings</h1>
+        </div>
+
+        <!-- Profile Settings -->
+        <div class="settings-section">
+            <h2>Profile Information</h2>
+            <div id="profileSuccess" class="success-message"></div>
+            <div id="profileError" class="error-message"></div>
+            
+            <form id="profileForm" onsubmit="updateProfile(event)">
+                <div class="form-group">
+                    <label for="nom">Full Name</label>
+                    <input type="text" id="nom" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email (Read-only)</label>
+                    <input type="email" id="email" readonly disabled style="background: #f7fafc; cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label for="telephone">Phone Number</label>
+                    <input type="tel" id="telephone">
+                </div>
+                <div class="form-group">
+                    <label for="languePreferee">Preferred Language</label>
+                    <select id="languePreferee">
+                        <option value="fr">Français</option>
+                        <option value="en">English</option>
+                        <option value="ar">العربية</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary" id="profileSubmitBtn">
+                    Update Profile
+                </button>
+            </form>
+        </div>
+
+        <!-- Password Settings -->
+        <div class="settings-section">
+            <h2>Change Password</h2>
+            <div id="passwordSuccess" class="success-message"></div>
+            <div id="passwordError" class="error-message"></div>
+            
+            <form id="passwordForm" onsubmit="changePassword(event)">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <input type="password" id="newPassword" required minlength="6">
+                    <div class="password-requirements">
+                        Must be at least 6 characters long
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm New Password</label>
+                    <input type="password" id="confirmPassword" required minlength="6">
+                </div>
+                <button type="submit" class="btn-primary" id="passwordSubmitBtn">
+                    Change Password
+                </button>
+            </form>
+        </div>
+
+        <!-- Account Info -->
+        <div class="settings-section">
+            <h2>Account Information</h2>
+            <div style="color: #718096; line-height: 1.8;">
+                <p><strong>Account Status:</strong> <span id="accountStatus" style="color: #38a169;">Active</span></p>
+                <p><strong>Role:</strong> <span id="accountRole">User</span></p>
+                <p><strong>Member Since:</strong> <span id="memberSince">-</span></p>
+                <p><strong>Last Login:</strong> <span id="lastLogin">-</span></p>
+            </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="confirm-modal">
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-icon">⚠️</div>
+            <div id="confirmMessage" class="confirm-modal-message">Êtes-vous sûr de vouloir vous déconnecter?</div>
+            <div class="confirm-modal-buttons">
+                <button id="confirmCancel" class="confirm-btn-cancel">Annuler</button>
+                <button id="confirmOk" class="confirm-btn-confirm">Déconnexion</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        let confirmCallback = null;
+
+        function showConfirmModal(message, callback) {
+            document.getElementById('confirmMessage').textContent = message;
+            confirmCallback = callback;
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        function hideConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+            confirmCallback = null;
+        }
+
+        document.getElementById('confirmCancel').addEventListener('click', hideConfirmModal);
+        document.getElementById('confirmOk').addEventListener('click', () => {
+            if (confirmCallback) confirmCallback();
+            hideConfirmModal();
+        });
+    </script>
+    <script>
+        // Check authentication
+        if (!requireAuth()) {
+            // Will redirect to login
+        }
+
+        // Load user info
+        const user = getUserInfo();
+        if (user) {
+            document.getElementById('userName').textContent = user.nom;
+            document.getElementById('userEmail').textContent = user.email;
+        }
+
+        // Section navigation
+        function showSection(sectionId, element) {
+            if (sectionId === 'overview') {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            if (sectionId === 'assistant') {
+                window.location.href = 'dashboard.html?section=assistant';
+                return;
+            }
+            if (sectionId === 'settings') {
+                // Already on settings page
+                return;
+            }
+            // For other sections, redirect to dashboard
+            window.location.href = 'dashboard.html';
+        }
+
+        // Check if user is admin and show admin link
+        function checkAdminAccess() {
+            const userInfo = getUserInfo();
+            if (userInfo && userInfo.role === 'ADMIN') {
+                const adminLink = document.getElementById('adminLink');
+                if (adminLink) {
+                    adminLink.style.display = 'flex';
+                }
+            }
+        }
+
+        // Logout
+        function handleLogout() {
+            showConfirmModal('Êtes-vous sûr de vouloir vous déconnecter?', () => {
+                logout();
+            });
+        }
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('active');
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', checkAdminAccess);
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            const sidebar = document.querySelector('.sidebar');
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+
+            if (window.innerWidth <= 768 &&
+                !sidebar.contains(e.target) &&
+                !menuBtn.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+    </script>
+    <script>
+        async function loadUserProfile() {
+            try {
+                const token = getToken();
+                
+                const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to load profile');
+
+                const user = await response.json();
+                
+                // Populate profile form
+                document.getElementById('nom').value = user.nom || '';
+                document.getElementById('email').value = user.email || '';
+                document.getElementById('telephone').value = user.telephone || '';
+                document.getElementById('languePreferee').value = user.languePreferee || 'fr';
+                
+                // Populate account info
+                document.getElementById('accountStatus').textContent = user.active ? 'Active' : 'Inactive';
+                document.getElementById('accountStatus').style.color = user.active ? '#38a169' : '#e53e3e';
+                document.getElementById('accountRole').textContent = user.role === 'ADMIN' ? 'Administrator' : 'User';
+                
+                if (user.createdAt) {
+                    document.getElementById('memberSince').textContent = new Date(user.createdAt).toLocaleDateString();
+                }
+                
+                if (user.lastLoginAt) {
+                    document.getElementById('lastLogin').textContent = formatDateTime(user.lastLoginAt);
+                }
+                
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showError('profileError', 'Failed to load profile information');
+            }
+        }
+
+        async function updateProfile(event) {
+            event.preventDefault();
+            
+            const submitBtn = document.getElementById('profileSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Updating...';
+            
+            hideMessages('profile');
+            
+            try {
+                const token = getToken();
+                const data = {
+                    nom: document.getElementById('nom').value,
+                    telephone: document.getElementById('telephone').value,
+                    languePreferee: document.getElementById('languePreferee').value
+                };
+                
+                const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to update profile');
+                }
+
+                showSuccess('profileSuccess', 'Profile updated successfully!');
+                
+                // Update stored user info if language changed
+                if (data.languePreferee) {
+                    const userInfo = getUserInfo();
+                    if (userInfo) {
+                        userInfo.languePreferee = data.languePreferee;
+                        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showError('profileError', error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Update Profile';
+            }
+        }
+
+        async function changePassword(event) {
+            event.preventDefault();
+            
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            hideMessages('password');
+            
+            if (newPassword !== confirmPassword) {
+                showError('passwordError', 'New passwords do not match');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('passwordSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Changing...';
+            
+            try {
+                const token = getToken();
+                const data = {
+                    currentPassword: document.getElementById('currentPassword').value,
+                    newPassword: newPassword
+                };
+                
+                const response = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to change password');
+                }
+
+                showSuccess('passwordSuccess', 'Password changed successfully!');
+                document.getElementById('passwordForm').reset();
+                
+            } catch (error) {
+                console.error('Error changing password:', error);
+                showError('passwordError', error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Change Password';
+            }
+        }
+
+        function showSuccess(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+        }
+
+        function hideMessages(prefix) {
+            document.getElementById(prefix + 'Success').style.display = 'none';
+            document.getElementById(prefix + 'Error').style.display = 'none';
+        }
+
+        function formatDateTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        window.addEventListener('DOMContentLoaded', loadUserProfile);
+    </script>
+</body>
+</html>

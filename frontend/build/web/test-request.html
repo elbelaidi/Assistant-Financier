@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Multilingual Backend</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+        button { padding: 15px 30px; margin: 10px; font-size: 16px; cursor: pointer; }
+        .arabic { background: #4CAF50; color: white; }
+        .english { background: #2196F3; color: white; }
+        .french { background: #FF9800; color: white; }
+        #result { margin-top: 20px; padding: 20px; background: #f9f9f9; border-left: 4px solid #4CAF50; min-height: 100px; }
+        .error { border-left-color: #f44336 !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Multilingual Backend</h1>
+        <p>Click a button to test the backend in different languages:</p>
+        
+        <button class="arabic" onclick="testLanguage('ar', 'كيف أوفر المال')">Test Arabic (العربية)</button>
+        <button class="english" onclick="testLanguage('en', 'How to save money')">Test English</button>
+        <button class="french" onclick="testLanguage('fr', 'Comment économiser')">Test French (Français)</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testLanguage(language, query) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = '';
+            resultDiv.innerHTML = '<p>⏳ Sending request...</p>';
+            
+            try {
+                const body = JSON.stringify({ query, language });
+                console.log('Sending:', body);
+                
+                const response = await fetch('http://localhost:8080/api/conseil', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    },
+                    body: body
+                });
+                
+                const text = await response.text();
+                console.log('Response:', text);
+                
+                resultDiv.innerHTML = `
+                    <p><strong>✅ Success!</strong></p>
+                    <p><strong>Language:</strong> ${language.toUpperCase()}</p>
+                    <p><strong>Query:</strong> ${query}</p>
+                    <p><strong>Response:</strong></p>
+                    <pre style="white-space: pre-wrap;">${text}</pre>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.className = 'error';
+                resultDiv.innerHTML = `
+                    <p><strong>❌ Error!</strong></p>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
